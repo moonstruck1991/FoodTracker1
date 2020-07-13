@@ -1,0 +1,64 @@
+html,body
+{
+    width: 100%;
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+    overflow-x: hidden; 
+    color: #6B8C46;
+}
+
+.navbar-custom{
+    background-color: lightgreen;
+}
+.table .thead-dark th{
+	background-color: lightgreen;
+	border: none;
+	color: #6B8C46 ;
+    font-size: 20px;
+	
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+}
+.row > [class*='col-'] {
+    display: flex;
+    flex-direction: column;
+}
+.blurb{
+	background-color: lightgreen;
+}
+
+.navtext{
+    color: #6B8C46 ;
+    font-size: 20px;
+    
+}
+.carousel-heading{
+    /* color: darkgreen; */
+    color: #6B8C46 ;
+    padding-bottom: 30px;
+    text-align: center;
+}
+.carousel-text{
+    padding:30px 30% 40px;
+    text-align: center;
+    color: #6B8C46 ;
+    font-size: 20px;
+}
+.carousel-img{
+    
+    margin: auto;
+    display: block;
+    height: 200px;
+    width:350px;
+    border-radius: 50%;
+}
+
+
+
+#exampleFormControlTextarea1{
+    background-color: #e9ecef;
+}

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Track Your Food</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- use meta to make mobile responsive -->
+    <!-- bootstrap CDN -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css">
+    <!-- google font -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;400&display=swap" rel="stylesheet">
+    <!-- custom CSS -->
+    <link rel="stylesheet" href="/stylesheets/styles.css">
+
+    <!-- pie chart -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+
+        var data = google.visualization.arrayToDataTable([
+          ['nutrient', 'value'],
+          ['Protein',     11],
+          ['Carb',      2],
+          ['water',  2]
+        ]);
+
+        var options = {
+          title: 'Percentage of nutrient intake',
+          backgroundColor: 'lightgreen',
+		  legend: {textStyle: {color: '#6B8C46'}},
+		  titleTextStyle: {color: '#6B8C46'}
+        };
+
+        var chart1 = new google.visualization.PieChart(document.getElementById('piechart1'));
+        chart1.draw(data, options);
+        
+        var chart2 = new google.visualization.PieChart(document.getElementById('piechart2'));
+        chart2.draw(data, options);
+        
+        var chart3 = new google.visualization.PieChart(document.getElementById('piechart3'));
+        chart3.draw(data, options);
+      }
+    </script>
+</head>
+<body>
+    <!-- navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom navbar-light ">
+            <li  class="navbar-brand pull-left "><img src="/imgs/foodt2.png" alt="logo"></li>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+              <div class="navbar-nav ml-auto">
+				
+                <a class="nav-item nav-link navtext"  href="/"> Home</a>
+                <a class="nav-item nav-link navtext"  href="/dashboard"> Dashboard </a>
+                <a class="nav-item nav-link navtext" href="/details"> Details </a>
+                
+              </div>
+            </div>
+          </nav>
+    <section class="mx-0">
+        <div class="container-fluid px-0">
+                <div class="jumbotron jumbotron-fluid">
+                    <div class="container text-center">
+                      <h1 class="display-4">1500/2000</h1>
+                      <p class="lead">Current calorie count</p>
+                    </div>
+                </div>  
+            
+            
+        </div>        
+    </section>
+    <section class="container-fluid px-0">
+        <div class="row align-items-center content">
+            <div class="col-md-6 order-2 order-md-1 " style="height: 100%">
+                <div id="piechart1" style="100% width: 100%"></div>
+            </div>
+            <div class="col-md-6 order-1 order-md-2  mb-5 mb-md-0">
+                <div class="text-center">
+                    <div class="row justify-content-center">
+                        <div class="col-10 col-lg-8">
+                           Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        <div class="row align-items-center content">
+            <div class="col-md-6 order-2">
+                <div id="piechart2" style="100% width: 100%"></div>
+            </div>
+            <div class="col-md-6 order-1  mb-5 mb-md-0">
+                <div class="text-center ">
+                    <div class="row justify-content-center">
+                        <div class="col-10 col-lg-8">
+                          Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        <div class="row align-items-center content">
+            <div class="col-md-6 order-2 blurb order-md-1">
+                <div id="piechart3" style="100% width: 100%"></div>
+            </div>
+            <div class="col-md-6 order-1 order-md-2  mb-5 mb-md-0">
+                <div class="text-center ">
+                    <div class="row justify-content-center">
+                        <div class="col-10 col-lg-8">
+                            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        <!-- Add new food eaten  -->
+        <form action="/" method="POST">
+            <div class="form-group container">
+                <label for="exampleFormControlTextarea1">Food Eaten: </label>
+                <textarea class="form-control" name="food" id="exampleFormControlTextarea1" rows="3"></textarea>
+				<button class="btn btn-primary">
+					submit
+				</button>
+              </div>
+            
+        </form>
+    </section>
+	
+    
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script>
+        $(function () {
+            $(document).scroll(function () {
+                var $nav = $("#mainNavbar");
+                $nav.toggleClass("scrolled", $(this).scrollTop() > $nav.height());
+            });
+        });
+    </script>
+
+</body>
+</html>
