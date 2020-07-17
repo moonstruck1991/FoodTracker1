@@ -165,7 +165,7 @@ app.get("*",function(req, res){
 })
 	
 
-app.listen(process.env.PORT, process.env.IP, function(){
+app.listen(process.env.PORT||3000, process.env.IP, function(){
 	console.log("Food tracker server has started")
 
 })
