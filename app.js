@@ -1,10 +1,12 @@
-var express = require("express")
-var app 	= express()
-var bodyParser=require('body-parser');
-var https=require('https');
+const express = require("express");
+var app 	= express();
+const bodyParser=require('body-parser');
+const https=require('https');
 const request = require('request');
-const path = require("path")
-var mongoose = require("mongoose")
+const path = require("path");
+const mongoose = require("mongoose");
+
+
 
 
 
@@ -29,7 +31,7 @@ var userSchema = new mongoose.Schema({
 		type: mongoose.Schema.Types.ObjectId,
 		ref: "Food",
 	}]
-})
+});
 
 var foodSchema = new mongoose.Schema({
 	date: String,
@@ -42,11 +44,12 @@ var foodSchema = new mongoose.Schema({
 var Food = mongoose.model('Food', foodSchema)
 var User = mongoose.model('User', userSchema);
 app.get("/",function(req,res){
+		res.render("landing.ejs");
+		
+	})
 	
-	res.render("landing.ejs")
 
-	
-})
+
 
 app.get("/:id",function(req,res){
 	User.findById(req.params.id, function(err, user){
@@ -63,8 +66,17 @@ app.get("/:id",function(req,res){
 	})
 })
 
-app.get(":id/details",function(req,res){
-	res.render("details.ejs")
+app.get("/:id/details",function(req,res){
+	User.findById(req.params.id,function(err, foundUser){
+		if(err){
+			console.log(err)
+			res.render("back")
+		}else{
+			res.render("details.ejs",{user: foundUser})	
+		}
+	})
+	
+	
 })
 
 app.post("/signup",function(req, res){
@@ -155,4 +167,7 @@ app.get("*",function(req, res){
 
 app.listen(process.env.PORT, process.env.IP, function(){
 	console.log("Food tracker server has started")
+
 })
+
+
