@@ -26,9 +26,9 @@ var userSchema = new mongoose.Schema({
 	}]
 });
 
-app.route('/')
+app.route("/")
 	.get(function(req,res){
-		res.render("landing.ejs")
+		res.render("landing.ejs");
 		
 	})
 	
@@ -37,17 +37,17 @@ app.route('/')
 		request(url,function(err, response, body){
 			var parsedData = JSON.parse(body)
 			res.redirect("/dashboard",{data: parsedData})
-		})})
+		})});
 
 
 
 
 app.get("/dashboard",function(req,res){
-	res.render("dashboard.ejs")
+	res.render("dashboard.ejs");
 });
 
 app.get("/details",function(req,res){
-	res.render("details.ejs")
+	res.render("details.ejs");
 });
 
 
