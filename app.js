@@ -1,3 +1,6 @@
+//jshint esversion:6
+
+require('dotenv').config();
 const express = require("express");
 var app 	= express();
 const bodyParser=require('body-parser');
@@ -5,21 +8,31 @@ const https=require('https');
 const request = require('request');
 const path = require("path");
 const mongoose = require("mongoose");
+const passport=require('passport');
+const passportLocalMongoose=require('passport-local-mongoose');
+var session=require('express-session');
+var date=require('./date');
+console.log(date.date());
 
+app.use(session({
+    secret:process.env.SECRET,
+    resave:false,
+    saveUninitialized:false            
+}));
 
-
-
-
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(bodyParser.urlencoded({extended:true}));
 
 app.use(express.static(path.join(__dirname, "static")));
 
 
-mongoose.connect('mongodb://localhost:27017/Foodtracker', {useNewUrlParser: true});
+mongoose.connect('mongodb://localhost:27017/Foodtracker', {useNewUrlParser: true,useUnifiedTopology:true});
+mongoose.set('useCreateIndex',true);
 
 var userSchema = new mongoose.Schema({
-	username: String,
+	name: String,
 	email: String,
 	password: String,
 	currentDate: String,
@@ -33,6 +46,8 @@ var userSchema = new mongoose.Schema({
 	}]
 });
 
+userSchema.plugin(passportLocalMongoose);
+
 var foodSchema = new mongoose.Schema({
 	date: String,
 	proteins: Number,
@@ -43,12 +58,15 @@ var foodSchema = new mongoose.Schema({
 
 var Food = mongoose.model('Food', foodSchema)
 var User = mongoose.model('User', userSchema);
+
+passport.use(User.createStrategy());
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
 app.get("/",function(req,res){
 		res.render("landing.ejs");
-		
 	})
-	
-
 
 
 app.get("/:id",function(req,res){
@@ -60,8 +78,6 @@ app.get("/:id",function(req,res){
 
 			res.render("dashboard.ejs",{user: user})
 
-		
-			
 		}
 	})
 })
@@ -80,20 +96,16 @@ app.get("/:id/details",function(req,res){
 })
 
 app.post("/signup",function(req, res){
-	var user = {username: req.body.username,
+	var user = {name: req.body.username,
 			   email: req.body.email,
 			   password: req.body.password}
-		var today = new Date();
-			var dd = String(today.getDate()).padStart(2, '0');
-			var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-			var yyyy = today.getFullYear();
-			today = mm + '/' + dd + '/' + yyyy;
-		user.currentDate = today
-		user.proteins= 0
-		user.carbs=0
-		user.calories=0
-		user.Fat = 0
-		user.data = []
+		
+		user.currentDate = date.date();
+		user.proteins= 0;
+		user.carbs=0;
+		user.calories=0;
+		user.Fat = 0;
+		user.data = [];
 
 	
 	User.create(user, function(err, createdUser){
@@ -111,13 +123,9 @@ app.post("/:id",function(req,res){
 		User.findById(req.params.id,function(err, user){
 			request(url,function(err, response, body){
 			var parsedData = JSON.parse(body)
-				var today = new Date();
-			var dd = String(today.getDate()).padStart(2, '0');
-			var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-			var yyyy = today.getFullYear();
-			today = mm + '/' + dd + '/' + yyyy;
+			
 			var food = {
-				date: today,
+				date: date.date(),
 				proteins: parsedData["hits"][0]["fields"]["nf_protein"],
 				carbs: parsedData["hits"][0]["fields"]["nf_total_carbohydrate"],
 				calories: parsedData["hits"][0]["fields"]["nf_calories"],
@@ -153,10 +161,7 @@ app.post("/:id",function(req,res){
 	// })
 				
 				
-			})
-		
-		
-		
+			})		
 	})
 })
 
@@ -166,7 +171,7 @@ app.get("*",function(req, res){
 	
 
 app.listen(process.env.PORT||3000, process.env.IP, function(){
-	console.log("Food tracker server has started")
+	console.log("Food tracker server has started");
 
 })
 
