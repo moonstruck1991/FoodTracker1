@@ -35,6 +35,7 @@ var userSchema = new mongoose.Schema({
 
 var foodSchema = new mongoose.Schema({
 	date: String,
+	title: String,
 	proteins: Number,
 	carbs: Number,
 	calories: Number,
@@ -67,7 +68,7 @@ app.get("/:id",function(req,res){
 })
 
 app.get("/:id/details",function(req,res){
-	User.findById(req.params.id,function(err, foundUser){
+	User.findById(req.params.id).populate("data").exec(function(err, foundUser){
 		if(err){
 			console.log(err)
 			res.render("back")
@@ -118,6 +119,7 @@ app.post("/:id",function(req,res){
 			today = mm + '/' + dd + '/' + yyyy;
 			var food = {
 				date: today,
+				title: req.body.food,
 				proteins: parsedData["hits"][0]["fields"]["nf_protein"],
 				carbs: parsedData["hits"][0]["fields"]["nf_total_carbohydrate"],
 				calories: parsedData["hits"][0]["fields"]["nf_calories"],
