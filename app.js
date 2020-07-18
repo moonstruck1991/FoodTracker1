@@ -49,6 +49,7 @@ userSchema.plugin(passportLocalMongoose);
 
 var foodSchema = new mongoose.Schema({
 	date: String,
+	title: String,
 	proteins: Number,
 	carbs: Number,
 	calories: Number,
@@ -106,6 +107,14 @@ app.get("/:id/details",function(req,res){
     }
 
 	
+	User.findById(req.params.id).populate("data").exec(function(err, foundUser){
+		if(err){
+			console.log(err)
+			res.render("back")
+		}else{
+			res.render("details.ejs",{user: foundUser})	
+		}
+	})
 	
 	
 })
@@ -165,7 +174,10 @@ app.post("/:id",function(req,res){
 			var parsedData = JSON.parse(body)
 			
 			var food = {
+
 				date: date.date(),
+				date: today,
+				title: req.body.food,
 				proteins: parsedData["hits"][0]["fields"]["nf_protein"],
 				carbs: parsedData["hits"][0]["fields"]["nf_total_carbohydrate"],
 				calories: parsedData["hits"][0]["fields"]["nf_calories"],

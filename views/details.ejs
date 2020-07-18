@@ -1,40 +1,36 @@
 <%- include('partials/header') %>
-    </head>
+    </head> 
     <body>
 		<div class="container-fluid">
 			<table class="table">
             <thead class="thead-dark" id = "thstyle">
               <tr>
                 <th class="text-center" scope="col">Day</th>
-                <th class="text-center" scope="col">Proteins</th>
+				<th class="text-center" scope="col">Food</th>
+                <th class="text-center" scope="col">Calories</th>
                 <th class="text-center" scope="col">Carbs</th>
-                <th class="text-center" scope="col">Water</th>
+                <th class="text-center" scope="col">Proteins</th>
+				<th class="text-center" scope="col">Fat</th>
+
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <th class="text-center" scope="row">27/7/20</th>
-                <td class="text-center">27</td>
-                <td class="text-center">35</td>
-                <td class="text-center">102</td>
-              </tr>
-              <tr>
-                <th class="text-center" scope="row">28/7/20</th>
-                <td class="text-center">40</td>
-                <td class="text-center">124</td>
-                <td class="text-center">12</td>
-              </tr>
-              <tr>
-                <th class="text-center" scope="row">29/7/20</th>
-                <td class="text-center">122</td>
-                <td class="text-center">1</td>
-                <td class="text-center">20</td>
-              </tr>
+				<% user.data.forEach(function(food){ %>
+				<tr>
+               		<th class="text-center" scope="row"><%= food.date%></th>
+                	<td class="text-center"><%= food.title%></td>
+                	<td class="text-center"><%= food.calories%></td>
+               		<td class="text-center"><%= food.carbs%></td>
+					<td class="text-center"><%= food.proteins%></td>
+					<td class="text-center"><%= food.Fat%></td>
+              	</tr>
+				<% }) %>
+                                
             </tbody>
           </table>
 			
 			<div class="d-flex justify-content-around align-items-center">
-				<a href="/<%= user._id%>"><button type="button" class="btn btn-success">DashBoard</button></a>
+				<a href="/<%= user._id%>"><button type="button" class="btn btn-success">Dashboard</button></a>
 			</div>
 		</div>
         
