@@ -15,7 +15,7 @@ var date=require('./date');
 console.log(date.date());
 
 app.use(session({
-    secret:process.env.SECRET,
+    secret: "Foodtracker is made by me and Kanu",
     resave:false,
     saveUninitialized:false            
 }));
@@ -31,7 +31,7 @@ mongoose.connect('mongodb://localhost:27017/Foodtracker', {useNewUrlParser: true
 mongoose.set('useCreateIndex',true);
 
 var userSchema = new mongoose.Schema({
-	name: String,
+	username: String,
 	email: String,
 	password: String,
 	currentDate: String,
@@ -93,7 +93,7 @@ app.get("/:id/details",function(req,res){
 
 	if(req.isAuthenticated())
      {
-		User.findById(req.params.id,function(err, foundUser){
+		User.findById(req.params.id).populate(data).exec(function(err, foundUser){
 			if(err){
 				console.log(err)
 				res.render("back")
@@ -107,22 +107,15 @@ app.get("/:id/details",function(req,res){
     }
 
 	
-	User.findById(req.params.id).populate("data").exec(function(err, foundUser){
-		if(err){
-			console.log(err)
-			res.render("back")
-		}else{
-			res.render("details.ejs",{user: foundUser})	
-		}
-	})
+	
 	
 	
 })
 
 app.post("/signup",function(req, res){
-	var user = {name: req.body.username,
+	var user = {username: req.body.username,
 			   email: req.body.email,
-			   password: req.body.password}
+			   }
 		
 		user.currentDate = date.date();
 		user.proteins= 0;
@@ -133,18 +126,18 @@ app.post("/signup",function(req, res){
 
 	
 	// User.create(user, function(err, createdUser){
-	// 	console.log(createdUser)
+		console.log(user)
 	// 		res.redirect("/" + createdUser._id)
 
 	// });
 
-	User.register({email:req.body.email},req.body.password,function(err,user){
+	User.register(user,req.body.password,function(err,user){
         if(err){
             console.log(err);
-            res.redirect('/register');
+            res.redirect('/');
         }else{
             passport.authenticate("local")(req,res,function(){
-                res.redirect("/"+user._id);
+                res.redirect("/" + user._id);
             });
         }
     });
@@ -161,7 +154,7 @@ app.post("/login",function(req,res){
             console.log(err)
         else{
             passport.authenticate("local")(req,res,function(){
-                res.redirect("/"+user._id);
+                res.redirect("/" + user._id);
             });
         }
     });
@@ -176,7 +169,6 @@ app.post("/:id",function(req,res){
 			var food = {
 
 				date: date.date(),
-				date: today,
 				title: req.body.food,
 				proteins: parsedData["hits"][0]["fields"]["nf_protein"],
 				carbs: parsedData["hits"][0]["fields"]["nf_total_carbohydrate"],
