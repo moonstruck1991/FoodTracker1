@@ -27,7 +27,6 @@ app.use(bodyParser.urlencoded({extended:true}));
 
 app.use(express.static(path.join(__dirname, "static")));
 
-
 mongoose.connect('mongodb://localhost:27017/Foodtracker', {useNewUrlParser: true,useUnifiedTopology:true});
 mongoose.set('useCreateIndex',true);
 
@@ -70,27 +69,43 @@ app.get("/",function(req,res){
 
 
 app.get("/:id",function(req,res){
-	User.findById(req.params.id, function(err, user){
-		if(err){
-			console.log(err)
-			res.redirect("back")
-		}else{
 
-			res.render("dashboard.ejs",{user: user})
+	if(req.isAuthenticated()){
+		User.findById(req.params.id, function(err, user){
+			if(err){
+				console.log(err)
+				res.redirect("back")
+			}else{
+	
+				res.render("dashboard.ejs",{user: user})
+	
+			}
+		})
+	}else{
+		res.redirect('/landing.ejs');
+	}
 
-		}
-	})
+	
 })
 
 app.get("/:id/details",function(req,res){
-	User.findById(req.params.id,function(err, foundUser){
-		if(err){
-			console.log(err)
-			res.render("back")
-		}else{
-			res.render("details.ejs",{user: foundUser})	
-		}
-	})
+
+	if(req.isAuthenticated())
+     {
+		User.findById(req.params.id,function(err, foundUser){
+			if(err){
+				console.log(err)
+				res.render("back")
+			}else{
+				res.render("details.ejs",{user: foundUser})	
+			}
+		})
+	 }   
+    else{
+        res.redirect('/landing.ejs');
+    }
+
+	
 	
 	
 })
@@ -108,15 +123,40 @@ app.post("/signup",function(req, res){
 		user.data = [];
 
 	
-	User.create(user, function(err, createdUser){
-		console.log(createdUser)
-			res.redirect("/" + createdUser._id)
+	// User.create(user, function(err, createdUser){
+	// 	console.log(createdUser)
+	// 		res.redirect("/" + createdUser._id)
 
-	})
-			
+	// });
 
-})
+	User.register({email:req.body.email},req.body.password,function(err,user){
+        if(err){
+            console.log(err);
+            res.redirect('/register');
+        }else{
+            passport.authenticate("local")(req,res,function(){
+                res.redirect("/"+user._id);
+            });
+        }
+    });
+});
 
+app.post("/login",function(req,res){
+	var user=new User({
+        email:req.body.email,
+        password:req.body.password
+    });
+
+    req.login(user,function(err){
+        if(err)
+            console.log(err)
+        else{
+            passport.authenticate("local")(req,res,function(){
+                res.redirect("/"+user._id);
+            });
+        }
+    });
+});
 
 app.post("/:id",function(req,res){
 	var url = "https://api.nutritionix.com/v1_1/search/"+ req.body.food +"?fields=item_name,brand_name,item_id,nf_calories,nf_total_fat,nf_protein,nf_total_carbohydrate&appId=8b2f16ba&appKey=bf903319558c8e7bb3ab4db7687c868d"
@@ -171,7 +211,7 @@ app.get("*",function(req, res){
 	
 
 app.listen(process.env.PORT||3000, process.env.IP, function(){
-	console.log("Food tracker server has started");
+	console.log("Food tracker server has started on local port 3000");
 
 })
 
