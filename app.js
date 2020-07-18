@@ -120,31 +120,25 @@ app.get("/:id/details",function(req,res){
 })
 
 app.post("/signup",function(req, res){
-	var user = {name: req.body.username,
-			   email: req.body.email,
-			   password: req.body.password}
+
 		
-		user.currentDate = date.date();
-		user.proteins= 0;
-		user.carbs=0;
-		user.calories=0;
-		user.Fat = 0;
-		user.data = [];
+		// user.currentDate = date.date();
+		// user.proteins= 0;
+		// user.carbs=0;
+		// user.calories=0;
+		// user.Fat = 0;
+		// user.data = [];
 
-	
-	// User.create(user, function(err, createdUser){
-	// 	console.log(createdUser)
-	// 		res.redirect("/" + createdUser._id)
-
-	// });
-
-	User.register({email:req.body.email},req.body.password,function(err,user){
+	User.register({username:req.body.email},req.body.password,function(err,user){
         if(err){
-            console.log(err);
-            res.redirect('/register');
+			console.log(err);
+			console.log(500);
+            res.redirect('/');
         }else{
             passport.authenticate("local")(req,res,function(){
-                res.redirect("/"+user._id);
+				console.log(user);
+				console.log('no error');
+                // res.redirect("/"+user._id);
             });
         }
     });
