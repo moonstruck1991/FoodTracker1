@@ -3,7 +3,8 @@
 <body>
 	
   <!-- Modal Login -->
-  <div class="modal fade" id="modalLoginForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+  
+  <form action="/login" method="POST" class="modal fade" id="modalLoginForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
   aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -30,11 +31,12 @@
 
       </div>
       <div class="modal-footer d-flex justify-content-center">
-        <button style="background-color: LIGHTGREEN;width: 100%;" class="btn navtext">Login</button>
+        <button type="submit" style="background-color: LIGHTGREEN;width: 100%;" class="btn navtext">Login</button>
       </div>
     </div>
   </div>
-</div>
+  </form>
+
 	<!-- Modal Sign Up -->
   <form action="/signup" method="POST" class="modal fade" id="modalRegisterForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
   aria-hidden="true">
@@ -69,7 +71,7 @@
 
      	</div>
      			 <div class="modal-footer d-flex justify-content-center">
-        <button style="background-color: LIGHTGREEN;width: 100%;" class="btn navtext">Sign up</button>
+        <button type="submit" style="background-color: LIGHTGREEN;width: 100%;" class="btn navtext">Sign up</button>
     			  </div>
    			 </div>
   		</div>
