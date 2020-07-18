@@ -114,26 +114,7 @@ app.get("/:id/details",function(req,res){
 
 app.post("/signup",function(req, res){
 
-		
-		// user.currentDate = date.date();
-		// user.proteins= 0;
-		// user.carbs=0;
-		// user.calories=0;
-		// user.Fat = 0;
-		// user.data = [];
-
-	User.register({username:req.body.email},req.body.password,function(err,user){
-        if(err){
-			console.log(err);
-			console.log(500);
-            res.redirect('/');
-        }else{
-            passport.authenticate("local")(req,res,function(){
-				console.log(user);
-				console.log('no error');
-                // res.redirect("/"+user._id);
-
-	var user = {username: req.body.username,
+			var user = {username: req.body.username,
 			   email: req.body.email,
 			   }
 		
@@ -144,9 +125,6 @@ app.post("/signup",function(req, res){
 		user.Fat = 0;
 		user.data = [];
 
-	
-	// User.create(user, function(err, createdUser){
-		console.log(user)
 	// 		res.redirect("/" + createdUser._id)
 
 	// });
@@ -231,10 +209,8 @@ app.post("/:id",function(req,res){
 
 app.get("*",function(req, res){
 	res.render("error.ejs")
-})
+});
 	
-
-app.listen(process.env.PORT||3000, process.env.IP, function(){
-	console.log("Food tracker server has started on local port 3000");
-
-})
+app.listen(3000||process.env.PORT,process.env.IP,function(){
+	console.log('Server up and running on port 3000');
+});
