@@ -1,5 +1,3 @@
-//jshint esversion:6
-
 require('dotenv').config();
 const express = require("express");
 var app 	= express();
@@ -7,20 +5,17 @@ const bodyParser=require('body-parser');
 const https=require('https');
 const request = require('request');
 const path = require("path");
+const bcrypt=require('bcrypt');
+const saltRounds=10;
 const mongoose = require("mongoose");
-const passport=require('passport');
-const localStrategy = require("passport-local").Strategy
-const passportLocalMongoose=require('passport-local-mongoose');
-var session=require('express-session');
 var date=require('./date');
-
 
 app.use(bodyParser.urlencoded({extended:true}));
 
 app.use(express.static(path.join(__dirname, "static")));
 
 mongoose.connect('mongodb://localhost:27017/Foodtracker', {useNewUrlParser: true,useUnifiedTopology:true});
-mongoose.set('useCreateIndex',true);
+
 
 var userSchema = new mongoose.Schema({
 	username: String,
@@ -37,7 +32,6 @@ var userSchema = new mongoose.Schema({
 	}]
 });
 
-userSchema.plugin(passportLocalMongoose);
 
 var foodSchema = new mongoose.Schema({
 	date: String,
@@ -52,36 +46,13 @@ var Food = mongoose.model('Food', foodSchema)
 var User = mongoose.model('User', userSchema);
 
 
-app.use(require("express-session")({
-	secret: "Foodtracker",
-	resave: false,
-	saveUninitialized: false
-}));
-
-
-app.use(passport.initialize())
-app.use(passport.session())
-passport.use(new localStrategy(User.authenticate()))
-passport.serializeUser(User.serializeUser())
-passport.deserializeUser(User.deserializeUser())
-
-
-
-app.use(function(req, res, next) {
-	res.locals.currentUser = req.user;
-	next()
-});
-
 
 app.get("/",function(req,res){
-	
 		res.render("landing.ejs");
 	})
 
 
 app.get("/:id",function(req,res){
-
-	if(req.isAuthenticated()){
 		User.findById(req.params.id, function(err, user){
 			if(err){
 				console.log(err)
@@ -92,18 +63,13 @@ app.get("/:id",function(req,res){
 	
 			}
 		})
-	}else{
-		res.redirect('/landing.ejs');
-	}
 
 	
 })
 
 app.get("/:id/details",function(req,res){
 
-	if(req.isAuthenticated())
-     {
-		User.findById(req.params.id).populate(data).exec(function(err, foundUser){
+		User.findById(req.params.id).populate('data').exec(function(err, foundUser){
 			if(err){
 				console.log(err)
 				res.render("back")
@@ -111,58 +77,60 @@ app.get("/:id/details",function(req,res){
 				res.render("details.ejs",{user: foundUser})	
 			}
 		})
-	 }   
-    else{
-        res.redirect('/landing.ejs');
-    }
-
-	
-	
-	
-	
 })
+	
 
 app.post("/signup",function(req, res){
-	var user = {username: req.body.username,
-			   email: req.body.email,
-			   }
-		
-		user.currentDate = date.date();
-		user.proteins= 0;
-		user.carbs=0;
-		user.calories=0;
-		user.Fat = 0;
-		user.data = [];
+	User.findOne({email:req.body.email},function(err,foundUser){
+        if(err){
+			console.log(err);
+		}   
+        else if(foundUser){
+            res.send('This email is already registered.')
+		}
+		else{
+			bcrypt.hash(req.body.password,saltRounds,function(err,hash){
+				var user=new User({
+					email:req.body.email,
+					password:hash,
+					currentDate:  date.date(),
+					proteins: 0,
+					carbs:0,
+					calories:0,
+					Fat:  0,
+					data:  [],
+					username: req.body.username
+				});
+				user.save(function(err){
+					if(err)
+						console.log(err);
+					else    
+					   res.redirect('/'+user._id);
+				});
+			});
+		}
+    });
 
 	
-	// User.create(user, function(err, createdUser){
-		console.log(user)
-	// 		res.redirect("/" + createdUser._id)
+});
 
-	// });
 
-	User.register(new User(user),req.body.password,function(err,user){
-        if(err){
+app.post('/login',function(req,res){
+	User.findOne({email:req.body.mail},function(err,foundUser){
+        if(err)
             console.log(err);
-            res.redirect('/');
-        }else{
-            passport.authenticate("local")(req,res,function(){
-                res.redirect("/" + user._id);
+        else if(foundUser){
+            bcrypt.compare(req.body.assword,foundUser.password,function(err,response){
+                if(err)
+                    console.log(err);
+                else if(response)
+                    res.redirect('/'+foundUser._id);
+                else 
+                    res.send('Sorry, that password is incorrect.')
             });
         }
     });
 });
-
-app.post('/login',
-  passport.authenticate('local'),
-  function(req, res) {
-    // If this function gets called, authentication was successful.
-    // `req.user` contains the authenticated user.
-    console.log(req.user)
-	res.redirect('/');
-  });
-	
-
 
 
 app.post("/:id",function(req,res){
@@ -175,10 +143,10 @@ app.post("/:id",function(req,res){
 
 				date: date.date(),
 				title: req.body.food,
-				proteins: parsedData["hits"][0]["fields"]["nf_protein"],
-				carbs: parsedData["hits"][0]["fields"]["nf_total_carbohydrate"],
-				calories: parsedData["hits"][0]["fields"]["nf_calories"],
-				Fat: parsedData["hits"][0]["fields"]["nf_total_fat"],
+				proteins: Math.floor(parsedData["hits"][0]["fields"]["nf_protein"]),
+				carbs: Math.floor(parsedData["hits"][0]["fields"]["nf_total_carbohydrate"]),
+				calories: Math.floor(parsedData["hits"][0]["fields"]["nf_calories"]),
+				Fat: Math.floor(parsedData["hits"][0]["fields"]["nf_total_fat"]),
 			}
 			
 			Food.create(food,function(err,food){
@@ -216,12 +184,14 @@ app.post("/:id",function(req,res){
 
 app.get("*",function(req, res){
 	res.render("error.ejs")
-})
+});
 	
-
-app.listen(process.env.PORT||3000, process.env.IP, function(){
-	console.log("Food tracker server has started on local port 3000");
-
-})
-
-
+app.listen(3000||process.env.PORT,process.env.IP,function(){
+	console.log('Server up and running on port 3000');
+});
+	
+	
+	
+	
+	
+	
