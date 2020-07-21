@@ -7,6 +7,10 @@ const request = require('request');
 const path = require("path");
 const bcrypt=require('bcrypt');
 const saltRounds=10;
+const passport = require("passport")
+const localStrategy = require("passport-local")
+const passportLocalMongoose = require("passport-local-mongoose")
+
 const mongoose = require("mongoose");
 var date=require('./date');
 
@@ -32,6 +36,7 @@ var userSchema = new mongoose.Schema({
 	}]
 });
 
+userSchema.plugin(passportLocalMongoose);
 
 var foodSchema = new mongoose.Schema({
 	date: String,
@@ -45,14 +50,32 @@ var foodSchema = new mongoose.Schema({
 var Food = mongoose.model('Food', foodSchema)
 var User = mongoose.model('User', userSchema);
 
+app.use(require("express-session")({
+	secret: "Gaming and coding",
+	resave: false,
+	saveUninitialized: false
+}));
+app.use(passport.initialize())
+app.use(passport.session())
+
+passport.use(new localStrategy(User.authenticate()))
+passport.serializeUser(User.serializeUser())
+passport.deserializeUser(User.deserializeUser())
+
+
 
 
 app.get("/",function(req,res){
-		res.render("landing.ejs");
+	
+	
+			res.render("landing.ejs");
+	
+	
+	
 	})
 
 
-app.get("/:id",function(req,res){
+app.get("/:id",isLoggedIn,function(req,res){
 		User.findById(req.params.id, function(err, user){
 			if(err){
 				console.log(err)
@@ -67,7 +90,7 @@ app.get("/:id",function(req,res){
 	
 })
 
-app.get("/:id/details",function(req,res){
+app.get("/:id/details",isLoggedIn,function(req,res){
 
 		User.findById(req.params.id).populate('data').exec(function(err, foundUser){
 			if(err){
@@ -81,59 +104,50 @@ app.get("/:id/details",function(req,res){
 	
 
 app.post("/signup",function(req, res){
-	User.findOne({email:req.body.email},function(err,foundUser){
-        if(err){
-			console.log(err);
-		}   
-        else if(foundUser){
-            res.send('This email is already registered.')
-		}
-		else{
-			bcrypt.hash(req.body.password,saltRounds,function(err,hash){
-				var user=new User({
+	var user= {
 					email:req.body.email,
-					password:hash,
+					username: req.body.username,
 					currentDate:  date.date(),
 					proteins: 0,
 					carbs:0,
 					calories:0,
 					Fat:  0,
 					data:  [],
-					username: req.body.username
-				});
-				user.save(function(err){
-					if(err)
-						console.log(err);
-					else    
-					   res.redirect('/'+user._id);
-				});
-			});
+					
+				};
+	
+	User.register(new User(user),req.body.password, function(err, createdUser){
+		if(err){
+			console.log(err)
+			res.redirect("/")
+		}else{
+			console.log(createdUser)
+			passport.authenticate("local")(req, res, function(){ 								res.redirect("/" + createdUser._id); })
 		}
-    });
-
+	})
 	
 });
 
+app.post('/login',
+  passport.authenticate('local', {failureRedirect: "/ovnsobs/oanonba/baba"}),
+  function(req, res) {
+    // If this function gets called, authentication was successful.
+    // `req.user` contains the authenticated user.
+    res.redirect('/' + req.user._id);
+  });
 
-app.post('/login',function(req,res){
-	User.findOne({email:req.body.mail},function(err,foundUser){
-        if(err)
-            console.log(err);
-        else if(foundUser){
-            bcrypt.compare(req.body.assword,foundUser.password,function(err,response){
-                if(err)
-                    console.log(err);
-                else if(response)
-                    res.redirect('/'+foundUser._id);
-                else 
-                    res.send('Sorry, that password is incorrect.')
-            });
-        }
-    });
+
+app.get('/logout', function(req, res){
+	console.log(req.user)
+	req.logout();
+	console.log(req.user)
+  res.redirect('/aoab/babsab/ababab');
 });
 
 
-app.post("/:id",function(req,res){
+
+
+app.post("/:id",isLoggedIn,function(req,res){
 	var url = "https://api.nutritionix.com/v1_1/search/"+ req.body.food +"?fields=item_name,brand_name,item_id,nf_calories,nf_total_fat,nf_protein,nf_total_carbohydrate&appId=8b2f16ba&appKey=bf903319558c8e7bb3ab4db7687c868d"
 		User.findById(req.params.id,function(err, user){
 			request(url,function(err, response, body){
@@ -182,13 +196,35 @@ app.post("/:id",function(req,res){
 	})
 })
 
+
+
+app.get('/logout', function(req, res){
+	console.log(req.user)
+	req.logOut();
+	console.log(req.user)
+  res.redirect('/aoab/babsab/ababab');
+});
+
+
+
+
 app.get("*",function(req, res){
 	res.render("error.ejs")
 });
+
+
+// middleware
+
+function isLoggedIn(req, res, next){
+	if(req.isAuthenticated()){
+		return	next()
+	}
+	res.redirect("/oaboaba/oanboanba/biana")
+}
 	
 app.listen(3000||process.env.PORT,process.env.IP,function(){
 	console.log('Server up and running on port 3000');
-});
+})
 	
 	
 	
