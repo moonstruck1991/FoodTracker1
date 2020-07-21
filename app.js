@@ -9,19 +9,11 @@ const request = require('request');
 const path = require("path");
 const mongoose = require("mongoose");
 const passport=require('passport');
+const localStrategy = require("passport-local").Strategy
 const passportLocalMongoose=require('passport-local-mongoose');
 var session=require('express-session');
 var date=require('./date');
-console.log(date.date());
 
-app.use(session({
-    secret: "Foodtracker is made by me and Kanu",
-    resave:false,
-    saveUninitialized:false            
-}));
-
-app.use(passport.initialize());
-app.use(passport.session());
 
 app.use(bodyParser.urlencoded({extended:true}));
 
@@ -59,12 +51,30 @@ var foodSchema = new mongoose.Schema({
 var Food = mongoose.model('Food', foodSchema)
 var User = mongoose.model('User', userSchema);
 
-passport.use(User.createStrategy());
 
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+app.use(require("express-session")({
+	secret: "Foodtracker",
+	resave: false,
+	saveUninitialized: false
+}));
+
+
+app.use(passport.initialize())
+app.use(passport.session())
+passport.use(new localStrategy(User.authenticate()))
+passport.serializeUser(User.serializeUser())
+passport.deserializeUser(User.deserializeUser())
+
+
+
+app.use(function(req, res, next) {
+	res.locals.currentUser = req.user;
+	next()
+});
+
 
 app.get("/",function(req,res){
+	
 		res.render("landing.ejs");
 	})
 
@@ -131,7 +141,7 @@ app.post("/signup",function(req, res){
 
 	// });
 
-	User.register(user,req.body.password,function(err,user){
+	User.register(new User(user),req.body.password,function(err,user){
         if(err){
             console.log(err);
             res.redirect('/');
@@ -143,22 +153,17 @@ app.post("/signup",function(req, res){
     });
 });
 
-app.post("/login",function(req,res){
-	var user=new User({
-        email:req.body.email,
-        password:req.body.password
-    });
+app.post('/login',
+  passport.authenticate('local'),
+  function(req, res) {
+    // If this function gets called, authentication was successful.
+    // `req.user` contains the authenticated user.
+    console.log(req.user)
+	res.redirect('/');
+  });
+	
 
-    req.login(user,function(err){
-        if(err)
-            console.log(err)
-        else{
-            passport.authenticate("local")(req,res,function(){
-                res.redirect("/" + user._id);
-            });
-        }
-    });
-});
+
 
 app.post("/:id",function(req,res){
 	var url = "https://api.nutritionix.com/v1_1/search/"+ req.body.food +"?fields=item_name,brand_name,item_id,nf_calories,nf_total_fat,nf_protein,nf_total_carbohydrate&appId=8b2f16ba&appKey=bf903319558c8e7bb3ab4db7687c868d"
