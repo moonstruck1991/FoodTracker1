@@ -75,33 +75,7 @@ app.get("/",function(req,res){
 	})
 
 
-app.get("/:id",isLoggedIn,function(req,res){
-		User.findById(req.params.id, function(err, user){
-			if(err){
-				console.log(err)
-				res.redirect("back")
-			}else{
-	
-				res.render("dashboard.ejs",{user: user})
-	
-			}
-		})
-
-	
-})
-
-app.get("/:id/details",isLoggedIn,function(req,res){
-
-		User.findById(req.params.id).populate('data').exec(function(err, foundUser){
-			if(err){
-				console.log(err)
-				res.render("back")
-			}else{
-				res.render("details.ejs",{user: foundUser})	
-			}
-		})
-})
-	
+// index routes
 
 app.post("/signup",function(req, res){
 	var user= {
@@ -129,23 +103,64 @@ app.post("/signup",function(req, res){
 });
 
 app.post('/login',
-  passport.authenticate('local', {failureRedirect: "/ovnsobs/oanonba/baba"}),
+  passport.authenticate('local', {failureRedirect: "/"}),
   function(req, res) {
-    // If this function gets called, authentication was successful.
-    // `req.user` contains the authenticated user.
+
     res.redirect('/' + req.user._id);
   });
 
 
 app.get('/logout', function(req, res){
-	console.log(req.user)
 	req.logout();
-	console.log(req.user)
-  res.redirect('/aoab/babsab/ababab');
+	
+  res.redirect('/');
 });
 
+// dashboard route
+
+app.get("/:id",isLoggedIn,function(req,res){
+		User.findById(req.params.id, function(err, user){
+			if(err){
+				console.log(err)
+				res.redirect("back")
+			}else{
+					console.log(date.date())
+					console.log(user.currentDate)
+				    if(user.currentDate === date.date()){
+							res.render("dashboard.ejs",{user: user})
+					}else{
+							user.currentDate = date.date()
+							user.proteins = 0
+							user.carbs = 0
+							user.calories = 0
+							user.Fat = 0
+							user.save()
+							res.render("dashboard.ejs",{user: user})
+					}	
+				
+	
+			}
+		})
+
+	
+})
+
+// details
+
+app.get("/:id/details",isLoggedIn,function(req,res){
+
+		User.findById(req.params.id).populate('data').exec(function(err, foundUser){
+			if(err){
+				console.log(err)
+				res.render("back")
+			}else{
+				res.render("details.ejs",{user: foundUser})	
+			}
+		})
+})
 
 
+// adding Food
 
 app.post("/:id",isLoggedIn,function(req,res){
 	var url = "https://api.nutritionix.com/v1_1/search/"+ req.body.food +"?fields=item_name,brand_name,item_id,nf_calories,nf_total_fat,nf_protein,nf_total_carbohydrate&appId=8b2f16ba&appKey=bf903319558c8e7bb3ab4db7687c868d"
@@ -168,29 +183,20 @@ app.post("/:id",isLoggedIn,function(req,res){
 					console.log(err)
 					res.redirect("back")
 				}else{
-					user.proteins = user.proteins + parsedData["hits"][0]["fields"]["nf_protein"]
+					
+						user.proteins = user.proteins + parsedData["hits"][0]["fields"]["nf_protein"]
 				
 				user.calories = user.calories + parsedData["hits"][0]["fields"]["nf_calories"]
 				user.Fat = user.Fat + parsedData["hits"][0]["fields"]["nf_total_fat"]
-				user.carbs = user.carbs+ parsedData["hits"][0]["fields"]["nf_total_carbohydrate"]
+				user.carbs = user.carbs+ parsedData["hits"][0]["fields"]["nf_total_carbohydrate"]	
+					
 					user.data.push(food)
 					user.save()
 					console.log(user)
 					res.redirect("/" + user._id)
 				}
 			})
-			// if(user.date = today){
-				
-				
-			// }
-	// 		user.data.push({
-	// 			date: today,
-	// 			proteins: parsedData["hits"][0]["fields"]["nf_protein"],
-	// 			carbs: parsedData["hits"][0]["fields"]["nf_total_carbohydrate"],
-	// 			calories: parsedData["hits"][0]["fields"]["nf_calories"],
-	// 			Fat: parsedData["hits"][0]["fields"]["nf_total_fat"]
-	// })
-				
+			
 				
 			})		
 	})
@@ -198,15 +204,8 @@ app.post("/:id",isLoggedIn,function(req,res){
 
 
 
-app.get('/logout', function(req, res){
-	console.log(req.user)
-	req.logOut();
-	console.log(req.user)
-  res.redirect('/aoab/babsab/ababab');
-});
 
-
-
+// error handling route
 
 app.get("*",function(req, res){
 	res.render("error.ejs")
