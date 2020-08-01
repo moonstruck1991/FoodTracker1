@@ -30,6 +30,10 @@ var userSchema = new mongoose.Schema({
 	carbs: Number,
 	calories: Number,
 	Fat: Number,
+	datewise: [{
+		type: mongoose.Schema.Types.ObjectId,
+		ref: "Datewise"
+	}],
 	data: [{
 		type: mongoose.Schema.Types.ObjectId,
 		ref: "Food",
@@ -37,6 +41,15 @@ var userSchema = new mongoose.Schema({
 });
 
 userSchema.plugin(passportLocalMongoose);
+
+var dateSchema = new mongoose.Schema({
+	date: String,
+	
+	proteins: Number,
+	carbs: Number,
+	calories: Number,
+	Fat: Number,
+})
 
 var foodSchema = new mongoose.Schema({
 	date: String,
@@ -48,6 +61,8 @@ var foodSchema = new mongoose.Schema({
 })
 
 var Food = mongoose.model('Food', foodSchema)
+var Datewise = mongoose.model('Datewise', dateSchema)
+
 var User = mongoose.model('User', userSchema);
 
 app.use(require("express-session")({
@@ -87,7 +102,7 @@ app.post("/signup",function(req, res){
 					calories:0,
 					Fat:  0,
 					data:  [],
-					
+					datewise: []	
 				};
 	
 	User.register(new User(user),req.body.password, function(err, createdUser){
@@ -119,13 +134,11 @@ app.get('/logout', function(req, res){
 // dashboard route
 
 app.get("/:id",isLoggedIn,function(req,res){
-		User.findById(req.params.id, function(err, user){
+		User.findById(req.params.id).populate('datewise').exec( function(err, user){
 			if(err){
 				console.log(err)
 				res.redirect("back")
 			}else{
-					console.log(date.date())
-					console.log(user.currentDate)
 				    if(user.currentDate === date.date()){
 							res.render("dashboard.ejs",{user: user})
 					}else{
@@ -134,8 +147,28 @@ app.get("/:id",isLoggedIn,function(req,res){
 							user.carbs = 0
 							user.calories = 0
 							user.Fat = 0
-							user.save()
+							var datewise = {
+							date : date.date(),
+							proteins : 0,
+							carbs : 0,
+							calories : 0,
+							Fat : 0 
+							}
+							Datewise.create(datewise,function(err, datewise){
+								if(err){
+									console.log(err)
+									res.redirect("/osbnosnbs/bsbsbs/bsbsd")
+								}else{
+									user.datewise.push(datewise)
+									if(user.datewise.length === 7)
+										{
+											user.datewise.shift()
+										}
+									user.save()
 							res.render("dashboard.ejs",{user: user})
+								}
+							})
+						
 					}	
 				
 	
@@ -189,11 +222,21 @@ app.post("/:id",isLoggedIn,function(req,res){
 				user.calories = user.calories + parsedData["hits"][0]["fields"]["nf_calories"]
 				user.Fat = user.Fat + parsedData["hits"][0]["fields"]["nf_total_fat"]
 				user.carbs = user.carbs+ parsedData["hits"][0]["fields"]["nf_total_carbohydrate"]	
+					Datewise.findOne({date: date.date()},function(err,datewise){
+						console.log(datewise)
+					datewise.proteins = datewise.proteins + parsedData["hits"][0]["fields"]["nf_protein"]
+				
+				datewise.calories = datewise.calories + parsedData["hits"][0]["fields"]["nf_calories"]
+				datewise.Fat = datewise.Fat + parsedData["hits"][0]["fields"]["nf_total_fat"]
+				datewise.carbs = datewise.carbs+ parsedData["hits"][0]["fields"]["nf_total_carbohydrate"]
+					datewise.save()	
 					
 					user.data.push(food)
 					user.save()
 					console.log(user)
 					res.redirect("/" + user._id)
+					})
+					
 				}
 			})
 			
