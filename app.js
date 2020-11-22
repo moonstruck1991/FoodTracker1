@@ -268,8 +268,3 @@ app.listen(3000||process.env.PORT,process.env.IP,function(){
 	console.log('Server up and running on port 3000');
 })
 	
-	
-	
-	
-	
-	
